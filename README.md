@@ -1788,9 +1788,9 @@ Finished sampling:
 ## Feature Engineering
 
 According to the organizer, once a user is defined as 'Fraud', then all of his corresponding transactions will be marked as 'Fraud'.
-However, how do we determine that multiple transactions that come from the same user? The host stated that:
+However, how do we determine that multiple transactions that come from the same user? The host stated the features below:
 
-1. The features of email addresses P and R email;
+1. The features of email addresses P and R email
 
 2. The address, which is obviously the feature of addr1 and addr2
 
@@ -1848,7 +1848,7 @@ number of missing value in R_emaildomain:  0
 The aggregation of the above features will be added in the training later to see whether the score can be improved.
 
 
-Doing the cross-validation to see which feature is the most importance:
+Doing the cross-validation to see which feature is the most important:
 ```python
 params = {'num_leaves': 491,
           'feature_fraction': 1,#0.3797454081646243,
@@ -1946,7 +1946,7 @@ plt.savefig('feature importance of Cross-validation')
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20Cross-validation.png" width="500" height="400">
 
 
-TransactionDT is most important, but there might be an over-fitting outcome, so I try to delete this feature and replace it with
+TransactionDT is the most important, but there might be an over-fitting outcome, so I try to delete this feature and replace it with
 its derived features.
 ```python
 X.drop(['year','month'],axis=1,inplace=True)
@@ -1996,8 +1996,8 @@ Feature Importance after dealing with TransactionDT:
 
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20TransactionDT.png" width="500" height="400">
 
-Then, I would like to process TransactionAmt.
-First observing the PSI:
+
+Observing the PSI:
 
 ```
 PSI:              feature    fold_1    fold_2    fold_3    fold_4    fold_5
@@ -2014,6 +2014,7 @@ PSI:              feature    fold_1    fold_2    fold_3    fold_4    fold_5
 383          has_id  0.313582  0.016269  0.044783  0.022193  0.016269
 ```
 
+Then, I would like to process TransactionAmt.
 Trying the binning for TransactionAmt:
 
 ```python
