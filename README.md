@@ -158,97 +158,132 @@ be deleted later while using LightGBM for training.
 
 ### Analysing the TransactionAmt
 Kernel density estimation:
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20in%20train_transaction.png" width="500" height="400">
+
 Kernel density estimation after Logarithmic transformation：
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20in%20train_transaction%20-%20Logarithm.png" width="500" height="400">
+
 Box plot of TransactionAmt:
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20in%20train_transaction%20-%20Box%20Plot.png" width="500" height="400">
+
 There exist some extreme values.
 
 The distributions in train and test data:
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20-%20train%20vs%20test.png" width="500" height="400">
 
 Kolmogorov-smirnov test:
+
 ```
 Class: TransactionAmt
 Kolmogorov-Smirnov test:    KS-stat = 0.017615    p-value = 6.158e-74
 ```
 
 ### Analysing productCD
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Count%20of%20Observations%20by%20ProductCD.png" width="500" height="400">
+
 ```
 Number of Missing Values in ProductCD in train_transaction: 0
 ```
+
 ### Analysing card1 ~ card6
+
 Observing the missing values and cumulative distribution function:
+
 ```
 Class: card1
 Percentage of Missing Value: 0.0
 Number of Categories: 13553 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card1.png" width="500" height="400">
+
 ```
 Class: card2
 Percentage of Missing Value: 0.015126833068039422
 Number of Categories: 500 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card2.png" width="500" height="400">
+
 ```
 Class: card3
 Percentage of Missing Value: 0.0026501168422122124
 Number of Categories: 114 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card3.png" width="500" height="400">
+
 ```
 Class: card4
 Percentage of Missing Value: 0.00267043722694483
 Number of Categories: 4 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card4.png" width="500" height="400">
+
 ```
 Class: card5
 Percentage of Missing Value: 0.007212043214684865
 Number of Categories: 119 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card5.png" width="500" height="400">
+
 ```
 Class: card6
 Percentage of Missing Value: 0.0026602770345785214
 Number of Categories: 4 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20card6.png" width="500" height="400">
 
 ### Analysing addr1 and addr2
+
 Observing the missing values and cumulative distribution function:
+
 ```
 Class: addr1
 Percentage of Missing Value: 0.1112642666034477
 Number of Categories: 332 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20addr1.png" width="500" height="400">
+
 ```
 Class: addr2
 Percentage of Missing Value: 0.1112642666034477
 Number of Categories: 74 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20addr2.png" width="500" height="400">
 
 ### Analysing P_emaildomain and R_emaildomain
+
 Observing the missing values and cumulative distribution function:
+
 ```
 Class: P_emaildomain
 Percentage of Missing Value: 0.1599485216920107
 Number of Categories: 59 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20P_email.png" width="500" height="400">
+
 ```
 Class: R_emaildomain
 Percentage of Missing Value: 0.7675161716395164
 Number of Categories: 60 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Cumulation%20of%20R_email.png" width="500" height="400">
 
 ### Analysing M1 ~ M9
+
 ```
 Class: M1
 Percentage of Missing Value: 0.4590713584177194
@@ -288,6 +323,7 @@ Number of Categories: 2
 ```
 
 ### Analysing dist1 and dist2
+
 ```python
 def cumulate_continue(data,col):
     print('Class: ', col)
@@ -322,6 +358,7 @@ Class:  dist1
 Percentage of Missing Value: 0.596523520845328
 Number of Categories: 2651 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/dist1.png" width="500" height="400">
 
 ```
@@ -329,185 +366,245 @@ Class:  dist2
 Percentage of Missing Value: 0.9362837403054831
 Number of Categories: 1751 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/dist2.png" width="500" height="400">
 
 ### Analysing C1 ~ C14
+
 ```
 Class:  C1
 Percentage of Missing Value: 0.0
 Number of Categories: 1657 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C1.png" width="500" height="400">
+
 ```
 Class:  C2
 Percentage of Missing Value: 0.0
 Number of Categories: 1216 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C2.png" width="500" height="400">
+
 ```
 Class:  C3
 Percentage of Missing Value: 0.0
 Number of Categories: 27 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C3.png" width="500" height="400">
+
 ```
 Class:  C4
 Percentage of Missing Value: 0.0
 Number of Categories: 1260 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C4.png" width="500" height="400">
+
 ```
 Class:  C5
 Percentage of Missing Value: 0.0
 Number of Categories: 319 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C5.png" width="500" height="400">
+
 ```
 Class:  C6
 Percentage of Missing Value: 0.0
 Number of Categories: 1328 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C6.png" width="500" height="400">
+
 ```
 Class:  C7
 Percentage of Missing Value: 0.0
 Number of Categories: 1103 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C7.png" width="500" height="400">
+
 ```
 Class:  C8
 Percentage of Missing Value: 0.0
 Number of Categories: 1253 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C8.png" width="500" height="400">
+
 ```
 Class:  C9
 Percentage of Missing Value: 0.0
 Number of Categories: 205 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C9.png" width="500" height="400">
+
 ```
 Class:  C10
 Percentage of Missing Value: 0.0
 Number of Categories: 1231 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C10.png" width="500" height="400">
+
 ```
 Class:  C11
 Percentage of Missing Value: 0.0
 Number of Categories: 1476 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C11.png" width="500" height="400">
+
 ```
 Class:  C12
 Percentage of Missing Value: 0.0
 Number of Categories: 1199 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C12.png" width="500" height="400">
+
 ```
 Class:  C13
 Percentage of Missing Value: 0.0
 Number of Categories: 1597 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C13.png" width="500" height="400">
+
 ```
 Class:  C14
 Percentage of Missing Value: 0.0
 Number of Categories: 1108 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/C14.png" width="500" height="400">
 
 ### Analysing D1 ~ D15
+
 ```
 Class:  D1
 Percentage of Missing Value: 0.0021488806854743116
 Number of Categories: 641 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D1.png" width="500" height="400">
+
 ```
 Class:  D2
 Percentage of Missing Value: 0.4754919226470688
 Number of Categories: 641 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D2.png" width="500" height="400">
+
 ```
 Class:  D3
 Percentage of Missing Value: 0.44514850814508755
 Number of Categories: 649 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D3.png" width="500" height="400">
+
 ```
 Class:  D4
 Percentage of Missing Value: 0.2860466691502693
 Number of Categories: 808 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D4.png" width="500" height="400">
+
 ```
 Class:  D5
 Percentage of Missing Value: 0.524674027161581
 Number of Categories: 688 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D5.png" width="500" height="400">
+
 ```
 Class:  D6
 Percentage of Missing Value: 0.8760676668811597
 Number of Categories: 829 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D6.png" width="500" height="400">
+
 ```
 Class:  D7
 Percentage of Missing Value: 0.9340992989467267
 Number of Categories: 597 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D7.png" width="500" height="400">
+
 ```
 Class:  D8
 Percentage of Missing Value: 0.8731229044603245
 Number of Categories: 12353 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D8.png" width="500" height="400">
+
 ```
 Class:  D9
 Percentage of Missing Value: 0.8731229044603245
 Number of Categories: 24 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D9.png" width="500" height="400">
+
 ```
 Class:  D10
 Percentage of Missing Value: 0.1287330240119213
 Number of Categories: 818 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D10.png" width="500" height="400">
+
 ```
 Class:  D11
 Percentage of Missing Value: 0.47293494090154775
 Number of Categories: 676 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D11.png" width="500" height="400">
+
 ```
 Class:  D12
 Percentage of Missing Value: 0.8904104717715988
 Number of Categories: 635 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D12.png" width="500" height="400">
+
 ```
 Class:  D13
 Percentage of Missing Value: 0.8950926270870728
 Number of Categories: 577 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D13.png" width="500" height="400">
+
 ```
 Class:  D14
 Percentage of Missing Value: 0.8946946862193924
 Number of Categories: 802 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D14.png" width="500" height="400">
+
 ```
 Class:  D15
 Percentage of Missing Value: 0.1509008703898127
 Number of Categories: 859 
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/D15.png" width="500" height="400">
+
 
 ### Analysing V1 ~ V319
 
@@ -833,6 +930,7 @@ V317 2e-05
 V318 2e-05
 V319 2e-05
 ```
+
 ### Analysing id_1 ~ id_38
 
 ```
