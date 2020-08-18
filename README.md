@@ -1612,7 +1612,9 @@ Name: DeviceInfo, Length: 1786, dtype: int64
 ```
 
 ## Preprocessing
+
 Merging the transaction and identity data:
+
 ```python
 train_identity['has_id']=1
 train=train_transaction.merge(train_identity, how='left', left_index=True, right_index=True)
@@ -1621,6 +1623,7 @@ test=test_transaction.merge(test_identity, how='left', left_index=True, right_in
 ```
 
 Here I use the function below to reduce the memory usage in pandas:
+
 ```python
 def reduce_mem_usage(df):
      #iterate through all the columns of a dataframe and modify the data type
@@ -1683,7 +1686,70 @@ Finished sampling:
 	y shape:(590540,) 
 ```
 
-## Feature Importance
+
+## Feature Engineering
+
+According to the organizer, once a user is defined as 'Fraud', then all of his corresponding transactions will be marked as 'Fraud'.
+However, how do we determine that multiple transactions that come from the same user? The host stated that:
+
+1. The features of email addresses P and R email;
+
+2. The address, which is obviously the feature of addr1 and addr2
+
+3. User account
+
+Here I use the negative sampling and observe its unique value to roughly determine whether this feature can be used for uniqueness determination:
+
+```python
+X['y']=y
+fraud=X[X.y==1]
+```
+
+Checking the missing value of card1 ~ card6 to determine whether they can be mapped to unique users:
+
+```python
+card1 = fraud.card1.value_counts()
+print('number of missing value in card1: ',fraud.card1.isnull().sum())
+card1 = card1[card1>0]
+print('number of unique card1: ',card1.shape[0])
+```
+
+```
+number of missing value in card1:  0
+number of unique card1:  1740
+number of missing value in card2:  0
+number of unique card2:  328
+number of missing value in card3:  0
+number of unique card3:  63
+number of missing value in card4:  0
+number of unique card4:  5
+number of missing value in card5:  0
+number of unique card5:  50
+number of missing value in card6:  0
+number of unique card6:  3 
+```
+
+There are no missing values in all cards, so we can determine the unique card through card1 - card6.
+Later I would like to aggregate features of card1 to card6.
+
+Observing the address:
+
+```
+number of missing value in addr1:  7741
+number of missing value in addr2:  7741 
+```
+It might be that the same users lose both addr1 and addr2.
+
+Observing the email:
+
+```
+number of missing value in P_emaildomain:  0
+number of missing value in R_emaildomain:  0
+```
+
+The aggregation of the above features will be added in the training later to see whether the score can be improved.
+
+
 Doing the cross-validation to see which feature is the most importance:
 ```python
 params = {'num_leaves': 491,
@@ -1829,15 +1895,106 @@ Out of folds AUC = 0.9096124143011752
 ```
 
 Feature Importance after dealing with TransactionDT:
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20TransactionDT.png" width="500" height="400">
 
-Then, I would like to process TransactionAmt:
+Then, I would like to process TransactionAmt.
+First observing the PSI:
+
+```
+PSI:              feature    fold_1    fold_2    fold_3    fold_4    fold_5
+0     TransactionDT  0.000531  0.000926  0.000569  0.000220  0.000018
+1    TransactionAmt  0.760167  0.218534  0.240927  0.225956  0.270768
+2             dist1  0.116246  0.033917  0.038364  0.034633  0.049485
+3             dist2  0.034019  0.019909  0.026873  0.027001  0.034547
+4                C1  0.066917  0.012865  0.010096  0.013650  0.018613
+..              ...       ...       ...       ...       ...       ...
+379           id_08  0.011754  0.002461  0.002882  0.003631  0.002048
+380           id_09  0.124157  0.010760  0.018326  0.012398  0.004354
+381           id_10  0.123148  0.011459  0.018413  0.012261  0.003649
+382           id_11  0.309666  0.017178  0.044611  0.024725  0.018522
+383          has_id  0.313582  0.016269  0.044783  0.022193  0.016269
+```
+
+Trying the binning for TransactionAmt:
+
+```python
+# Binning - cart tree
+iv=[]
+PSIs=[]
+TransactionAmt=X.TransactionAmt
+for bins in [5,10,15,20,25,30,35,40,45,50]:
+    bins=toad.DTMerge(TransactionAmt,y,n_bins=bins).tolist()
+    bins.insert(0,-np.inf)
+    bins.append(np.inf)
+    X.TransactionAmt=np.digitize(TransactionAmt,bins)
+    iv.append(toad.quality(X[['TransactionAmt','y']],'y').iv.values[0])
+    PSIs.append(PSI_cal(5,X,y,cats))
+
+print('IV after cart tree: ',iv)
+print('PSI after cart tree: ',PSIs)
+
+
+
+# Binning - chimerge
+iv=[]
+PSIs=[]
+for bins in [5,10,15,20,25,30,35,40,45,50]:
+    bins=toad.ChiMerge(TransactionAmt,y,n_bins=bins).tolist() # DTmerge，ChiMerge，KMeansMerge，QuantileMerge
+    bins.insert(0,-np.inf)
+    bins.append(np.inf)
+    X.TransactionAmt=np.digitize(TransactionAmt,bins)
+    iv.append(toad.quality(X[['TransactionAmt','y']],'y').iv.values[0])
+    PSIs.append(PSI_cal(5,X,y,cats))
+
+print('IV after chimerge: ',iv)
+print('PSI after chimerge: ',PSIs)
+
+
+
+# Binning - kmeans merge
+iv=[]
+PSIs=[]
+for bins in [5,10,15,20,25,30,35,40,45,50]:
+    bins=toad.KMeansMerge(TransactionAmt,y,n_bins=bins).tolist() # DTmerge，ChiMerge，KMeansMerge，QuantileMerge
+    bins.insert(0,-np.inf)
+    bins.append(np.inf)
+    X.TransactionAmt=np.digitize(TransactionAmt,bins)
+    iv.append(toad.quality(X[['TransactionAmt','y']],'y').iv.values[0])
+    PSIs.append(PSI_cal(5,X,y, cats))
+
+print('IV after kmeans merge: ',iv)
+print('PSI after kmeans merge: ',PSIs)
+```
+
+Result:
+
+```
+Class: TransactionAmt
+Original Information Value:  0.2058847344507144
+Original Population Stability Index:  0.34327045481107543
+
+IV after cart tree:  [0.12198830816553775, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144, 0.2058847344507144]
+PSI after cart tree:  [0.0012451352953930163, 0.004525429269179209, 0.0051395623311646784, 0.008239099643990326, 0.014556160598400153, 0.02739766926485464, 0.028261124134124783, 0.029407827402452253, 0.030342983010878687, 0.03138445353451209]
+
+IV after chimerge:  [0.12553957942969127, 0.22327379793772928, 0.2317534180526106, 0.19837567666518288, 0.19837567666518288, 0.2049864218284863, 0.2068895507881729, 0.2068895507881729, 0.2068895507881729, 0.20470628154222392]
+PSI after chimerge:  [0.001481575351249291, 0.017597195224925075, 0.028592359913524046, 0.0341737284431819, 0.04163968550182455, 0.04353819303092197, 0.06317425179249572, 0.06492120435096087, 0.07434188608361532, 0.08047228260474705]
+
+IV after kmeans merge:  [0.022056371653563604, 0.0315928849560944, 0.0621661699657942, 0.07934223936302433, 0.10067971618971677, 0.12544475947867806, 0.11972008501933762, 0.14955465067581158, 0.14757507259257743, 0.15062661292198293]
+PSI after kmeans merge:  [0.0008498433829856464, 0.0023143436118735856, 0.003915125844458691, 0.0034460363712985275, 0.004657652179627167, 0.0073015854370605355, 0.019002772221801127, 0.03534854319035138, 0.03271971388528722, 0.03415572679722579]
+```
+
+The effect is best when using cart tree with bins = 10, but the training result is not as expected. The magical treatment for TransactionAmt provided in the  Kaggle discussion: the decimal point of the transaction amount determines countries! Therefore, I deprecate binning.
+
+
 ```python
 X['TransactionAmt_decimal'] = ((X['TransactionAmt'] - X['TransactionAmt'].astype(int)) * 1000).astype(int)
 X['TransactionAmt'] = X['TransactionAmt_decimal']
 del X['TransactionAmt_decimal']
 ```
+
 Training:
+
 ```
 Training until validation scores don't improve for 100 rounds
 [200]	training's auc: 1	valid_1's auc: 0.89428
@@ -1872,9 +2029,13 @@ Out of folds AUC = 0.9164658130152636
 The AUC score has improved.
 
 Feature Importance after dealing with TransactionAmt:
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20TransactionAmt.png" width="500" height="400">
 
+## Training
+
 Finally adding the derived feature from Aggregation:
+
 ```python
 X['identity']=X.card1.astype(str)+'_'+X.card2.astype(str)+'_'+X.card3.astype(str)+'_'+ \
 X.card4.astype(str)+'_'+X.card5.astype(str)+'_'+X.card6.astype(str)
@@ -1882,7 +2043,9 @@ X.card4.astype(str)+'_'+X.card5.astype(str)+'_'+X.card6.astype(str)
 X.identity=X.identity.astype(str)+'_'+X.addr1.astype(str)+'_'+X.addr2.astype(str)+'_'+X.P_emaildomain.astype(str)+'_'+X.R_emaildomain.astype(str)
 X.identity=X.identity.astype('category')
 ```
+
 And the final parameter:
+
 ```python
 params = {'num_leaves': 491,
           'min_child_weight': 0.03454472573214212,
