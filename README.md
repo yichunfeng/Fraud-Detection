@@ -24,7 +24,7 @@ at you own device.
 conda env create -f environment.yaml
 ```
 
-## Overview of train_transaciton
+## Overview of dataset
 
 ### Categorical features - Transaction
 * ProductCD
@@ -164,6 +164,15 @@ Kernel density estimation after Logarithmic transformation：
 Box plot of TransactionAmt:
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20in%20train_transaction%20-%20Box%20Plot.png" width="500" height="400">
 There exist some extreme values.
+
+The distributions in train and test data:
+<img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/TransactionAmt%20-%20train%20vs%20test.png" width="500" height="400">
+
+Kolmogorov-smirnov test:
+```
+Class: TransactionAmt
+Kolmogorov-Smirnov test:    KS-stat = 0.017615    p-value = 6.158e-74
+```
 
 ### Analysing productCD
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Count%20of%20Observations%20by%20ProductCD.png" width="500" height="400">
@@ -1602,4 +1611,345 @@ A0001              1
 Name: DeviceInfo, Length: 1786, dtype: int64
 ```
 
+## Preprocessing
+Merging the transaction and identity data:
+```python
+train_identity['has_id']=1
+train=train_transaction.merge(train_identity, how='left', left_index=True, right_index=True)
+test_identity['had_id']=1
+test=test_transaction.merge(test_identity, how='left', left_index=True, right_index=True)
+```
+
+Here I use the function below to reduce the memory usage in pandas:
+```python
+def reduce_mem_usage(df):
+     #iterate through all the columns of a dataframe and modify the data type
+        #to reduce memory usage.        
+    
+    start_mem = df.memory_usage().sum() / 1024**2
+    print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
+    
+    for col in df.columns:
+        col_type = df[col].dtype
+        
+        if col_type != object :
+            c_min = df[col].min()
+            c_max = df[col].max()
+            if str(col_type)[:3] == 'int':
+                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+                    df[col] = df[col].astype(np.int64)  
+            else:
+                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float16)
+                elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+                    df[col] = df[col].astype(np.float32)
+                else:
+                    df[col] = df[col].astype(np.float64)
+        else:
+            df[col] = df[col].astype('category')
+
+    end_mem = df.memory_usage().sum() / 1024**2
+    print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
+    print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
+    
+    return df
+```
+
+Sampling without shuffling:
+
+```python
+X = copy.deepcopy(train)
+X_test = copy.deepcopy(test)
+```
+
+Setting the target:
+```python
+y = X["isFraud"]
+del X["isFraud"]
+
+print("X shape:{}, X_test shape:{}".format(X.shape, X_test.shape))
+print("y shape:{}".format(y.shape))
+```
+
+```
+Finished sampling: 
+	X shape:(590540, 433), X_test shape:(506691, 433)
+	y shape:(590540,) 
+```
+
+## Feature Importance
+Doing the cross-validation to see which feature is the most importance:
+```python
+params = {'num_leaves': 491,
+          'feature_fraction': 1,#0.3797454081646243,
+          'bagging_fraction': 1,#0.4181193142567742,
+          'objective': 'binary',
+          'max_depth': -1,
+          'learning_rate': 0.1,
+          "boosting_type": "gbdt",
+          "bagging_seed": 11,
+          "metric": 'auc',
+          "verbosity": -1,
+          'random_state': 47,
+         }
+NFOLDS = 5
+folds = StratifiedKFold(n_splits=NFOLDS)
+
+columns = X.columns
+splits = folds.split(X, y)
+y_preds = np.zeros(X_test.shape[0])
+y_oof = np.zeros(X.shape[0])
+score = 0
+
+feature_importances = pd.DataFrame()
+feature_importances['feature'] = columns
+  
+for fold_n, (train_index, valid_index) in enumerate(splits):
+    X_train, X_valid = X[columns].iloc[train_index], X[columns].iloc[valid_index]
+    y_train, y_valid = y.iloc[train_index], y.iloc[valid_index]
+    
+    dtrain = lgb.Dataset(X_train, label=y_train)
+    dvalid = lgb.Dataset(X_valid, label=y_valid)
+
+    clf = lgb.train(params, dtrain, 1000, valid_sets = [dtrain, dvalid], verbose_eval=200, early_stopping_rounds=100)
+    
+    feature_importances[f'fold_{fold_n + 1}'] = clf.feature_importance()
+    
+    y_pred_valid = clf.predict(X_valid)
+    y_oof[valid_index] = y_pred_valid
+    print(f"Fold {fold_n + 1} | AUC: {roc_auc_score(y_valid, y_pred_valid)}")
+    
+    score += roc_auc_score(y_valid, y_pred_valid) / NFOLDS
+    y_preds += clf.predict(X_test) / NFOLDS
+    
+    del X_train, X_valid, y_train, y_valid
+    gc.collect()
+
+    
+    
+print(f"\nMean AUC = {score}")
+print(f"Out of folds AUC = {roc_auc_score(y, y_oof)}")
+```
+
+```
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.880561
+[400]	training's auc: 1	valid_1's auc: 0.885042
+Early stopping, best iteration is:
+[336]	training's auc: 1	valid_1's auc: 0.888068
+Fold 1 | AUC: 0.8880677190000972
+Training until validation scores don't improve for 100 rounds
+Early stopping, best iteration is:
+[35]	training's auc: 0.997641	valid_1's auc: 0.904081
+Fold 2 | AUC: 0.9040812272361682
+Training until validation scores don't improve for 100 rounds
+Early stopping, best iteration is:
+[60]	training's auc: 0.999918	valid_1's auc: 0.919139
+Fold 3 | AUC: 0.9191391794238797
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.950676
+[400]	training's auc: 1	valid_1's auc: 0.951627
+[600]	training's auc: 1	valid_1's auc: 0.95223
+Early stopping, best iteration is:
+[521]	training's auc: 1	valid_1's auc: 0.952742
+Fold 4 | AUC: 0.9527418489851609
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.919926
+[400]	training's auc: 1	valid_1's auc: 0.923399
+Early stopping, best iteration is:
+[359]	training's auc: 1	valid_1's auc: 0.923997
+Fold 5 | AUC: 0.9239973279337228
+
+Mean AUC = 0.9176054605158057
+Out of folds AUC = 0.7895479686846192
+```
+
+The feature importance:
+```python
+feature_importances['average'] = feature_importances[[f'fold_{fold_n+1}' for fold_n in range(5)]].mean(axis = 1)
+plt.figure(figsize = (8,10))
+sns.barplot(data=feature_importances.sort_values(by='average', ascending=False).head(50), x='average',y='feature')
+plt.title('50 TOP feature importance over 5 folds average'.format(folds.n_splits))
+plt.savefig('feature importance of Cross-validation')
+```
+
+<img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20Cross-validation.png" width="500" height="400">
+
+
+TransactionDT is most important, but there might be an over-fitting outcome, so I try to delete this feature and replace it with
+its derived features.
+```python
+X.drop(['year','month'],axis=1,inplace=True)
+X_test.drop(['year','month'],axis=1,inplace=True)
+del X['TransactionDT']
+del X_test['TransactionDT']
+```
+
+Training again:
+```
+After dealing with TransactionDT...
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.89926
+[400]	training's auc: 1	valid_1's auc: 0.903266
+Early stopping, best iteration is:
+[401]	training's auc: 1	valid_1's auc: 0.903393
+Fold 1 | AUC: 0.9033936132577562
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.928316
+Early stopping, best iteration is:
+[153]	training's auc: 1	valid_1's auc: 0.928875
+Fold 2 | AUC: 0.9288750375327399
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.925962
+[400]	training's auc: 1	valid_1's auc: 0.928101
+Early stopping, best iteration is:
+[446]	training's auc: 1	valid_1's auc: 0.928623
+Fold 3 | AUC: 0.9286232994223065
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.948452
+[400]	training's auc: 1	valid_1's auc: 0.949067
+Early stopping, best iteration is:
+[363]	training's auc: 1	valid_1's auc: 0.949294
+Fold 4 | AUC: 0.949294471649418
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.920547
+[400]	training's auc: 1	valid_1's auc: 0.920644
+Early stopping, best iteration is:
+[352]	training's auc: 1	valid_1's auc: 0.921646
+Fold 5 | AUC: 0.9216464084861615
+
+Mean AUC = 0.9263665660696764
+Out of folds AUC = 0.9096124143011752
+```
+
+Feature Importance after dealing with TransactionDT:
+<img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20TransactionDT.png" width="500" height="400">
+
+Then, I would like to process TransactionAmt:
+```python
+X['TransactionAmt_decimal'] = ((X['TransactionAmt'] - X['TransactionAmt'].astype(int)) * 1000).astype(int)
+X['TransactionAmt'] = X['TransactionAmt_decimal']
+del X['TransactionAmt_decimal']
+```
+Training:
+```
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.89428
+Early stopping, best iteration is:
+[279]	training's auc: 1	valid_1's auc: 0.895762
+Fold 1 | AUC: 0.8957618775875847
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.924157
+Early stopping, best iteration is:
+[202]	training's auc: 1	valid_1's auc: 0.92421
+Fold 2 | AUC: 0.9242097600106162
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.922459
+[400]	training's auc: 1	valid_1's auc: 0.92396
+Early stopping, best iteration is:
+[381]	training's auc: 1	valid_1's auc: 0.924385
+Fold 3 | AUC: 0.9243850758082311
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.946515
+Early stopping, best iteration is:
+[296]	training's auc: 1	valid_1's auc: 0.947904
+Fold 4 | AUC: 0.9479037128442651
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 1	valid_1's auc: 0.916775
+Early stopping, best iteration is:
+[243]	training's auc: 1	valid_1's auc: 0.917828
+Fold 5 | AUC: 0.9178278693201013
+
+Mean AUC = 0.9220176591141597
+Out of folds AUC = 0.9164658130152636
+```
+The AUC score has improved.
+
+Feature Importance after dealing with TransactionAmt:
+<img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/Feature%20Importance%20-%20TransactionAmt.png" width="500" height="400">
+
+Finally adding the derived feature from Aggregation:
+```python
+X['identity']=X.card1.astype(str)+'_'+X.card2.astype(str)+'_'+X.card3.astype(str)+'_'+ \
+X.card4.astype(str)+'_'+X.card5.astype(str)+'_'+X.card6.astype(str)
+
+X.identity=X.identity.astype(str)+'_'+X.addr1.astype(str)+'_'+X.addr2.astype(str)+'_'+X.P_emaildomain.astype(str)+'_'+X.R_emaildomain.astype(str)
+X.identity=X.identity.astype('category')
+```
+And the final parameter:
+```python
+params = {'num_leaves': 491,
+          'min_child_weight': 0.03454472573214212,
+          'feature_fraction': 0.3797454081646243,
+          'bagging_fraction': 0.4181193142567742,
+          'min_data_in_leaf': 106,
+          'objective': 'binary',
+          'max_depth': -1,
+          'learning_rate': 0.006883242363721497,
+          "boosting_type": "gbdt",
+          "bagging_seed": 11,
+          "metric": 'auc',
+          "verbosity": -1,
+          'reg_alpha': 0.3899927210061127,
+          'reg_lambda': 0.6485237330340494,
+          'random_state': 47,
+          'num_threads':6
+         }
+NFOLDS = 5
+folds = StratifiedKFold(n_splits=NFOLDS)
+```
+
+```
+Aggregation of card, addr and email...
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 0.979597	valid_1's auc: 0.89193
+[400]	training's auc: 0.989708	valid_1's auc: 0.89585
+[600]	training's auc: 0.995078	valid_1's auc: 0.898025
+[800]	training's auc: 0.997739	valid_1's auc: 0.898831
+[1000]	training's auc: 0.998996	valid_1's auc: 0.898914
+Did not meet early stopping. Best iteration is:
+[1000]	training's auc: 0.998996	valid_1's auc: 0.898914
+Fold 1 | AUC: 0.8989143877948931
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 0.978032	valid_1's auc: 0.924345
+[400]	training's auc: 0.989142	valid_1's auc: 0.929785
+[600]	training's auc: 0.994865	valid_1's auc: 0.931901
+Early stopping, best iteration is:
+[585]	training's auc: 0.994581	valid_1's auc: 0.932046
+Fold 2 | AUC: 0.9320463310969629
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 0.978493	valid_1's auc: 0.921931
+[400]	training's auc: 0.989409	valid_1's auc: 0.927512
+[600]	training's auc: 0.995022	valid_1's auc: 0.930028
+[800]	training's auc: 0.997701	valid_1's auc: 0.930296
+Early stopping, best iteration is:
+[739]	training's auc: 0.997076	valid_1's auc: 0.930553
+Fold 3 | AUC: 0.9305532522036665
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 0.97831	valid_1's auc: 0.938248
+[400]	training's auc: 0.989269	valid_1's auc: 0.944985
+[600]	training's auc: 0.994733	valid_1's auc: 0.9484
+[800]	training's auc: 0.997468	valid_1's auc: 0.949629
+[1000]	training's auc: 0.998828	valid_1's auc: 0.949777
+Did not meet early stopping. Best iteration is:
+[1000]	training's auc: 0.998828	valid_1's auc: 0.949777
+Fold 4 | AUC: 0.9497765750731585
+Training until validation scores don't improve for 100 rounds
+[200]	training's auc: 0.978412	valid_1's auc: 0.913059
+[400]	training's auc: 0.989309	valid_1's auc: 0.919806
+[600]	training's auc: 0.994846	valid_1's auc: 0.922772
+[800]	training's auc: 0.997586	valid_1's auc: 0.923509
+Early stopping, best iteration is:
+[766]	training's auc: 0.99725	valid_1's auc: 0.923626
+Fold 5 | AUC: 0.9236257861082804
+
+Mean AUC = 0.9269832664553922
+Out of folds AUC = 0.9257745501860899
+```
 
