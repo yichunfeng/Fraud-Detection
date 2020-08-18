@@ -863,6 +863,7 @@ Categories
 24576.0      1
 Name: id_02, Length: 115655, dtype: int64
 ```
+
 ```
 Class:  id_03
 Missing Value:  0.54016
@@ -894,6 +895,7 @@ Categories
  10.0        1
 Name: id_03, dtype: int64
 ```
+
 ```
 Class:  id_04
 Missing Value:  0.54016
@@ -938,6 +940,7 @@ Categories
 -39.0        1
 Name: id_05, Length: 93, dtype: int64
 ```
+
 ```
 Class:  id_06
 Missing Value:  0.05108
@@ -956,6 +959,7 @@ Categories
 -89.0        1
 Name: id_06, Length: 101, dtype: int64
 ```
+
 ```
 Class:  id_07
 Missing Value:  0.96426
@@ -974,6 +978,7 @@ Categories
  61.0      1
 Name: id_07, Length: 84, dtype: int64
 ```
+
 ```
 Class:  id_08
 Missing Value:  0.96426
@@ -992,7 +997,9 @@ Categories
 -93.0       1
 Name: id_08, Length: 94, dtype: int64
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/id_05%20to%20id_08.png" width="500" height="400">
+
 ```
 Class:  id_09
 Missing Value:  0.48052
@@ -1046,6 +1053,7 @@ Categories
 -36.0        1
 Name: id_09, dtype: int64
 ```
+
 ```
 Class:  id_10
 Missing Value:  0.48052
@@ -1064,6 +1072,7 @@ Categories
 -53.0        1
 Name: id_10, Length: 62, dtype: int64
 ```
+
 ```
 Class:  id_11
 Missing Value:  0.02257
@@ -1082,6 +1091,7 @@ Categories
 94.169998          1
 Name: id_11, Length: 365, dtype: int64
 ```
+
 ```
 Class:  id_12
 Missing Value:  0.0
@@ -1091,7 +1101,9 @@ NotFound    123025
 Found        21208
 Name: id_12, dtype: int64
 ```
+
 <img src="https://github.com/yichunfeng/Fraud-Detection/blob/master/Figure/id_09%20to%20id_12.png" width="500" height="400">
+
 ```
 Class:  id_13
 Missing Value:  0.11726
@@ -1153,6 +1165,7 @@ Categories
 50.0        1
 Name: id_13, dtype: int64
 ```
+
 ```
 Class:  id_14
 Missing Value:  0.44504
@@ -1185,7 +1198,8 @@ Categories
  360.0        1
 Name: id_14, dtype: int64
 ```
-````
+
+```
 Class:  id_15
 Missing Value:  0.02252
 Number of Categories: 3
@@ -1195,6 +1209,7 @@ New        61612
 Unknown    11645
 Name: id_15, dtype: int64
 ```
+
 ```
 Class:  id_16
 Missing Value:  0.10326
@@ -1204,6 +1219,7 @@ Found       66324
 NotFound    63016
 Name: id_16, dtype: int64
 ```
+
 ```
 Class:  id_17
 Missing Value:  0.03372
@@ -1222,6 +1238,7 @@ Categories
 125.0        1
 Name: id_17, Length: 104, dtype: int64
 ```
+
 ```
 Class:  id_18
 Missing Value:  0.68722
@@ -1247,6 +1264,7 @@ Categories
 25.0        1
 Name: id_18, dtype: int64
 ```
+
 ```
 Class:  id_19
 Missing Value:  0.03408
@@ -1265,6 +1283,7 @@ Categories
 425.0        1
 Name: id_19, Length: 522, dtype: int64
 ```
+
 ```
 Class:  id_20
 Missing Value:  0.03447
@@ -1283,6 +1302,7 @@ Categories
 486.0        1
 Name: id_20, Length: 394, dtype: int64
 ```
+
 ```
 Class:  id_21
 Missing Value:  0.96423
@@ -1301,6 +1321,7 @@ Categories
 540.0       1
 Name: id_21, Length: 490, dtype: int64
 ```
+
 ```
 Class:  id_22
 Missing Value:  0.96416
@@ -1333,6 +1354,7 @@ Categories
 18.0       1
 Name: id_22, dtype: int64
 ```
+
 ```
 Class:  id_23
 Missing Value:  0.96416
@@ -1343,6 +1365,7 @@ IP_PROXY:ANONYMOUS      1071
 IP_PROXY:HIDDEN          609
 Name: id_23, dtype: int64
 ```
+
 ```
 Class:  id_24
 Missing Value:  0.96709
@@ -1362,6 +1385,7 @@ Categories
 23.0       1
 Name: id_24, dtype: int64
 ```
+
 ```
 Class:  id_25
 Missing Value:  0.96442
@@ -1380,6 +1404,7 @@ Categories
 392.0       1
 Name: id_25, Length: 341, dtype: int64
 ```
+
 ```
 Class:  id_26
 Missing Value:  0.9642
@@ -1398,6 +1423,7 @@ Categories
 127.0      1
 Name: id_26, Length: 95, dtype: int64
 ```
+
 ```
 Class:  id_27
 Missing Value:  0.96416
@@ -1416,6 +1442,7 @@ Found    76232
 New      64746
 Name: id_28, dtype: int64
 ```
+
 ```
 Class:  id_29
 Missing Value:  0.02257
@@ -1425,6 +1452,7 @@ Found       74926
 NotFound    66052
 Name: id_29, dtype: int64
 ```
+
 ```
 Class:  id_30
 Missing Value:  0.46222
@@ -1461,6 +1489,7 @@ iron                           1
 seamonkey                      1
 Name: id_31, Length: 130, dtype: int64
 ```
+
 ```
 Class:  id_32
 Missing Value:  0.46208
@@ -1472,6 +1501,7 @@ Categories
 0.0         6
 Name: id_32, dtype: int64
 ```
+
 ```
 Class:  id_33
 Missing Value:  0.49187
@@ -1490,6 +1520,7 @@ Categories
 1280x740         1
 Name: id_33, Length: 260, dtype: int64
 ```
+
 ```
 Class:  id_34
 Missing Value:  0.46056
@@ -1501,6 +1532,7 @@ match_status:0       415
 match_status:-1        3
 Name: id_34, dtype: int64
 ```
+
 ```
 Class:  id_35
 Missing Value:  0.02252
@@ -1510,6 +1542,7 @@ T    77814
 F    63171
 Name: id_35, dtype: int64
 ```
+
 ```
 Class:  id_36
 Missing Value:  0.02252
@@ -1519,6 +1552,7 @@ F    134066
 T      6919
 Name: id_36, dtype: int64
 ```
+
 ```
 Class:  id_37
 Missing Value:  0.02252
@@ -1528,6 +1562,7 @@ T    110452
 F     30533
 Name: id_37, dtype: int64
 ```
+
 ```
 Class:  id_38
 Missing Value:  0.02252
@@ -1537,6 +1572,7 @@ F    73922
 T    67063
 Name: id_38, dtype: int64
 ```
+
 ```
 Class:  DeviceType
 Missing Value:  0.02373
@@ -1546,6 +1582,7 @@ desktop    85165
 mobile     55645
 Name: DeviceType, dtype: int64
 ```
+
 ```
 Class:  DeviceInfo
 Missing Value:  0.17726
