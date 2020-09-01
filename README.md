@@ -18,7 +18,7 @@
 * scipy
 
 For Anaconda users, you can simply load *env_fraud_detection.yaml* and create the same environment
-at you own device.
+at your own device.
 
 ```
 conda env create -f environment.yaml
